@@ -18,6 +18,7 @@ jobs:
       contents: read
       packages: write
     strategy:
+      fail-fast: false
       matrix:
         unity-version: [2019.4.34f1, 2020.3.27f1, 2021.2.10f1]
         image-os: [ubuntu]
