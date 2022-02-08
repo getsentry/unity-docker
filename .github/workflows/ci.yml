@@ -19,16 +19,15 @@ jobs:
       packages: write
     strategy:
       matrix:
-        unity-version: [2019.4.34f1, 2020.3.27f1, 2021.2.10f1]
         image-os: [ubuntu]
         path: [editor]
         include:
           - unity-version: 2019.4.34f1
             unity-version-changeset: 6a9faed444f2
-          - unity-version: 2020.3.27f1
-            unity-version-changeset: e759542391ea
-          - unity-version: 2021.2.10f1
-            unity-version-changeset: ee872746220e
+          # - unity-version: 2020.3.27f1
+          #   unity-version-changeset: e759542391ea
+          # - unity-version: 2021.2.10f1
+          #   unity-version-changeset: ee872746220e
 
     steps:
       - uses: actions/checkout@v2
@@ -69,3 +68,4 @@ jobs:
             baseImage=unityci/base:${{ matrix.image-os }}-${{ env.BASE_REPO_VERSION }}
             version=${{ matrix.unity-version }}
             changeSet=${{ matrix.unity-version-changeSet }}
+
