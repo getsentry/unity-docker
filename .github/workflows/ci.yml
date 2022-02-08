@@ -33,12 +33,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - name: Prepare Dockerfile
         working-directory: ${{ matrix.path }}
         run: |
           wget -O Dockerfile https://raw.githubusercontent.com/game-ci/docker/v${{ env.BASE_REPO_VERSION }}/images/${{ matrix.image-os }}/${{ matrix.path }}/Dockerfile
           cat Dockerfile.append >> Dockerfile
           cat Dockerfile
+
+      - name: free disk space
+        run: |
+          df -h
+          sudo swapoff -a
+          sudo rm -f /swapfile
+          sudo apt clean
+          docker rmi $(docker image ls -aq)
+          df -h
 
       - name: Log in to the Container registry
         uses: docker/login-action@v1
