@@ -46,8 +46,18 @@ jobs:
           df -h
           sudo swapoff -a
           sudo rm -f /swapfile
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/share/swift
+          sudo rm -rf /usr/local/.ghcup
+          sudo rm -rf /usr/local/lib/node_modules
+          sudo rm -rf /usr/lib/google-cloud-sdk
+          sudo rm -rf /opt/pipx
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
           sudo apt clean
+          sudo rm -rf /var/lib/apt/lists/*
           docker rmi $(docker image ls -aq)
+          du --max-depth=3 --threshold=100M -h /usr /opt /var 2>/dev/null | sort -hr
           df -h
 
       - name: Log in to the Container registry
