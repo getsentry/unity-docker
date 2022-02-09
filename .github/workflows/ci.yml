@@ -38,10 +38,12 @@ jobs:
         working-directory: ${{ matrix.path }}
         run: |
           wget -O Dockerfile https://raw.githubusercontent.com/game-ci/docker/v${{ env.BASE_REPO_VERSION }}/images/${{ matrix.image-os }}/${{ matrix.path }}/Dockerfile
+          patch --verbose --batch --unified Dockerfile Dockerfile.patch
           cat Dockerfile.append >> Dockerfile
           cat Dockerfile
 
-      - name: free disk space
+      # Free up some disk space so we don't run out while building the docker image
+      - name: Free disk space
         run: |
           df -h
           sudo swapoff -a
@@ -54,7 +56,7 @@ jobs:
           sudo rm -rf /usr/lib/google-cloud-sdk
           sudo rm -rf /opt/pipx
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          sudo apt clean
+          sudo apt-get clean
           sudo rm -rf /var/lib/apt/lists/*
           docker rmi $(docker image ls -aq)
           du --max-depth=3 --threshold=100M -h /usr /opt /var 2>/dev/null | sort -hr

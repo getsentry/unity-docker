@@ -1,0 +1,9 @@
+@@ -21,1 +21,1 @@
+-        unity-hub install-modules --version "$version" --module "$mod" --childModules | tee /var/log/install-module-${mod}.log && grep 'Missing module' /var/log/install-module-${mod}.log | exit $(wc -l); \
++        unity-hub install-modules --version "$version" --module "$mod" | tee /var/log/install-module-${mod}.log && grep 'Missing module' /var/log/install-module-${mod}.log | exit $(wc -l); \
+@@ -90,1 +90,1 @@
+-RUN echo "$version-$module" | grep -q -v '^\(2018.3\|2018.4\).*android' \
++RUN exit 0 && echo "$version-$module" | grep -q -v '^\(2018.3\|2018.4\).*android' \
+@@ -142,1 +142,1 @@
+-RUN echo "$version-$module" | grep -q -vP '^20(?!18).*android' \
++RUN exit 0 && echo "$version-$module" | grep -q -vP '^20(?!18).*android' \
