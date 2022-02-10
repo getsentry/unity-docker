@@ -87,7 +87,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            module=ios android
+            module=ios android android-sdk-ndk-tools android-open-jdk
             hubImage=unityci/hub:${{ matrix.image-os }}-${{ env.BASE_REPO_VERSION }}
             baseImage=unityci/base:${{ matrix.image-os }}-${{ env.BASE_REPO_VERSION }}
             version=${{ matrix.unity-version }}
