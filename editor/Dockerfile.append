@@ -36,3 +36,8 @@ RUN apt-get update \
     && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+RUN export POWERSHELL_VERSION=7.2.1 \
+    && wget https://github.com/PowerShell/PowerShell/releases/download/v${POWERSHELL_VERSION}/powershell-lts_${POWERSHELL_VERSION}-1.deb_amd64.deb \
+    && dpkg -i powershell-lts_${POWERSHELL_VERSION}-1.deb_amd64.deb \
+    && rm powershell-lts_${POWERSHELL_VERSION}-1.deb_amd64.deb
