@@ -19,9 +19,10 @@ jobs:
       contents: read
       packages: write
     strategy:
+      fail-fast: false
       matrix:
         unity-version: [2019.4.34f1, 2020.3.27f1, 2021.2.10f1]
-        image-os: [ubuntu, windows]
+        image-os: [ubuntu]
         path: [editor]
         include:
           - unity-version: 2019.4.34f1
@@ -38,7 +39,7 @@ jobs:
         working-directory: ${{ matrix.path }}
         run: |
           wget -O Dockerfile https://raw.githubusercontent.com/game-ci/docker/v${{ env.BASE_REPO_VERSION }}/images/${{ matrix.image-os }}/${{ matrix.path }}/Dockerfile
-          # patch --verbose --batch --unified Dockerfile Dockerfile.patch
+          patch --verbose --batch --unified Dockerfile Dockerfile.patch
           cat Dockerfile.append >> Dockerfile
           cat Dockerfile
 
