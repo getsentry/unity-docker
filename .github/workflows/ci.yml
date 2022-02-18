@@ -21,16 +21,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        unity-version: [2019.4.34f1, 2020.3.27f1, 2021.2.10f1]
         image-os: [ubuntu]
         path: [editor]
+        unity-version: [2019.4.36f1, 2020.3.29f1, 2021.2.11f1]
         include:
-          - unity-version: 2019.4.34f1
-            unity-version-changeset: 6a9faed444f2
-          - unity-version: 2020.3.27f1
-            unity-version-changeset: e759542391ea
-          - unity-version: 2021.2.10f1
-            unity-version-changeset: ee872746220e
+          - unity-version: 2019.4.36f1
+            unity-version-changeset: 660c164b2fc5
+          - unity-version: 2020.3.29f1
+            unity-version-changeset: 2ff179115da0
+          - unity-version: 2021.2.11f1
+            unity-version-changeset: e50cafbb4399
 
     steps:
       - uses: actions/checkout@v2
