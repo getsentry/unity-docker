@@ -31,7 +31,6 @@ jobs:
         shell: pwsh
         run: |
           $pair = scripts/latest-version.ps1 "${{ matrix.unity-prefix }}"
-          echo "Latest version for prefix '${{ matrix.unity-prefix }}' is '$pair'"
           $version,$changeset = $pair.split("/")
           echo "::set-output name=version::$version"
           echo "::set-output name=changeset::$changeset"
@@ -40,12 +39,18 @@ jobs:
       - name: Check if the same version already exists
         id: exists
         run: |
-          bash -x
           if docker manifest inspect ${{ env.REGISTRY }}/${{ github.repository }}:${{ steps.version-select.outputs.imageTag }} > /dev/null ; then
             echo "::set-output name=value::1"
           else
             echo "::set-output name=value::0"
           fi
+
+      - name: Status
+        run: |
+          echo "version = ${{ steps.version-select.outputs.version }}"
+          echo "changeset = ${{ steps.version-select.outputs.changeset }}"
+          echo "image = ${{ steps.version-select.outputs.imageTag }}"
+          echo "exists already = ${{ steps.exists.outputs.value }}"
 
       - name: Prepare Dockerfile
         if: ${{ steps.exists.outputs.value }}
