@@ -53,7 +53,7 @@ jobs:
           echo "exists already = ${{ steps.exists.outputs.value }}"
 
       - name: Prepare Dockerfile
-        if: ${{ steps.exists.outputs.value }}
+        if: ${{ steps.exists.outputs.value == 0 }}
         working-directory: ${{ matrix.path }}
         run: |
           wget -O Dockerfile https://raw.githubusercontent.com/game-ci/docker/v${{ env.BASE_REPO_VERSION }}/images/${{ matrix.image-os }}/${{ matrix.path }}/Dockerfile
@@ -64,7 +64,7 @@ jobs:
       # Free up some disk space so we don't run out while building the docker image. Some commands that took longer
       # to execute are commented out but if more space is needed in the future, they can be enabled again.
       - name: Free disk space
-        if: ${{ steps.exists.outputs.value }}
+        if: ${{ steps.exists.outputs.value == 0 }}
         run: |
           # time df -h
           sudo time swapoff -a
@@ -85,7 +85,7 @@ jobs:
 
       - name: Log in to the Container registry
         uses: docker/login-action@v1
-        if: ${{ steps.exists.outputs.value }}
+        if: ${{ steps.exists.outputs.value == 0 }}
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -93,14 +93,14 @@ jobs:
 
       - name: Collect metadata
         uses: docker/metadata-action@v3
-        if: ${{ steps.exists.outputs.value }}
+        if: ${{ steps.exists.outputs.value == 0 }}
         id: meta
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}
 
       - name: Build the Docker image
         uses: docker/build-push-action@v2
-        if: ${{ steps.exists.outputs.value }}
+        if: ${{ steps.exists.outputs.value == 0 }}
         with:
           context: ./${{ matrix.path }}
           push: ${{ github.ref == 'main' }}
