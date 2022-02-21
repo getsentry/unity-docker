@@ -1,9 +1,6 @@
 name: Create and publish a Docker image
 
-on:
-  push
-  # branches:
-  #   - main
+on: push
 
 env:
   REGISTRY: ghcr.io
@@ -21,7 +18,7 @@ jobs:
       matrix:
         image-os: [ubuntu]
         path: [editor]
-        unity-prefix: [2019, 2020, 2021]
+        unity-prefix: ['2019', '2020', '2021']
 
     steps:
       - uses: actions/checkout@v2
