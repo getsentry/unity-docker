@@ -35,13 +35,20 @@ jobs:
           $version,$changeset = $pair.split("/")
           echo "::set-output name=version::$version"
           echo "::set-output name=changeset::$changeset"
+          echo "::set-output name=imageTag::${{ matrix.path }}-${{ matrix.image-os }}-$version-main"
 
       - name: Check if the same version already exists
+        id: exists
         run: |
-          gh api /users/${{ github.repository_owner }}/packages/container/${{ github.repository }}/versions
-          exit 1
+          bash -x
+          if docker manifest inspect ${{ env.REGISTRY }}/${{ github.repository }}:${{ steps.version-select.outputs.imageTag }} > /dev/null ; then
+            echo "::set-output name=value::1"
+          else
+            echo "::set-output name=value::0"
+          fi
 
       - name: Prepare Dockerfile
+        if: ${{ steps.exists.outputs.value }}
         working-directory: ${{ matrix.path }}
         run: |
           wget -O Dockerfile https://raw.githubusercontent.com/game-ci/docker/v${{ env.BASE_REPO_VERSION }}/images/${{ matrix.image-os }}/${{ matrix.path }}/Dockerfile
@@ -52,6 +59,7 @@ jobs:
       # Free up some disk space so we don't run out while building the docker image. Some commands that took longer
       # to execute are commented out but if more space is needed in the future, they can be enabled again.
       - name: Free disk space
+        if: ${{ steps.exists.outputs.value }}
         run: |
           # time df -h
           sudo time swapoff -a
@@ -72,27 +80,27 @@ jobs:
 
       - name: Log in to the Container registry
         uses: docker/login-action@v1
+        if: ${{ steps.exists.outputs.value }}
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Collect metadata
-        id: meta
         uses: docker/metadata-action@v3
+        if: ${{ steps.exists.outputs.value }}
+        id: meta
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}
-          flavor: |
-            latest=auto
-            prefix=${{ matrix.path }}-${{ matrix.image-os }}-${{ steps.version-select.outputs.version }}-
-            suffix=
 
       - name: Build the Docker image
         uses: docker/build-push-action@v2
+        if: ${{ steps.exists.outputs.value }}
         with:
           context: ./${{ matrix.path }}
           push: ${{ github.ref == 'main' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          # tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.version-select.outputs.imageTag }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             module=ios android android-sdk-ndk-tools android-open-jdk
