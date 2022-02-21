@@ -36,6 +36,11 @@ jobs:
           echo "::set-output name=version::$version"
           echo "::set-output name=changeset::$changeset"
 
+      - name: Check if the same version already exists
+        run: |
+          gh api /users/${{ github.repository_owner }}/packages/container/${{ github.repository }}/versions
+          exit 1
+
       - name: Prepare Dockerfile
         working-directory: ${{ matrix.path }}
         run: |
