@@ -1,11 +1,9 @@
 name: Create and publish a Docker image
 
 on:
-  push:
-    branches:
-      - main
-    tags:
-      - v*
+  push
+  # branches:
+  #   - main
 
 env:
   REGISTRY: ghcr.io
@@ -23,17 +21,20 @@ jobs:
       matrix:
         image-os: [ubuntu]
         path: [editor]
-        unity-version: [2019.4.36f1, 2020.3.29f1, 2021.2.11f1]
-        include:
-          - unity-version: 2019.4.36f1
-            unity-version-changeset: 660c164b2fc5
-          - unity-version: 2020.3.29f1
-            unity-version-changeset: 2ff179115da0
-          - unity-version: 2021.2.11f1
-            unity-version-changeset: e50cafbb4399
+        unity-prefix: [2019, 2020, 2021]
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Find the latest Unity version
+        id: version-select
+        shell: pwsh
+        run: |
+          $pair = scripts/latest-version.ps1 "${{ matrix.unity-prefix }}"
+          echo "Latest version for prefix '${{ matrix.unity-prefix }}' is '$pair'"
+          $version,$changeset = $pair.split("/")
+          echo "::set-output name=version::$version"
+          echo "::set-output name=changeset::$changeset"
 
       - name: Prepare Dockerfile
         working-directory: ${{ matrix.path }}
@@ -43,25 +44,26 @@ jobs:
           cat Dockerfile.append >> Dockerfile
           cat Dockerfile
 
-      # Free up some disk space so we don't run out while building the docker image
+      # Free up some disk space so we don't run out while building the docker image. Some commands that took longer
+      # to execute are commented out but if more space is needed in the future, they can be enabled again.
       - name: Free disk space
         run: |
-          df -h
-          sudo swapoff -a
-          sudo rm -f /swapfile
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/share/swift
-          sudo rm -rf /usr/local/.ghcup
-          sudo rm -rf /usr/local/lib/node_modules
-          sudo rm -rf /usr/lib/google-cloud-sdk
-          sudo rm -rf /opt/pipx
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          sudo apt-get clean
-          sudo rm -rf /var/lib/apt/lists/*
-          docker rmi $(docker image ls -aq)
-          du --max-depth=3 --threshold=100M -h /usr /opt /var 2>/dev/null | sort -hr
-          df -h
+          # time df -h
+          sudo time swapoff -a
+          sudo time rm -f /swapfile
+          # sudo time rm -rf /usr/local/lib/android
+          sudo time rm -rf /usr/share/dotnet
+          sudo time rm -rf /usr/share/swift
+          sudo time rm -rf /usr/local/.ghcup
+          # sudo time rm -rf /usr/local/lib/node_modules
+          # sudo time rm -rf /usr/lib/google-cloud-sdk
+          # sudo time rm -rf /opt/pipx
+          sudo time rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo time apt-get clean
+          sudo time rm -rf /var/lib/apt/lists/*
+          # time docker rmi $(docker image ls -aq)
+          # time du --max-depth=3 --threshold=100M -h /usr /opt /var 2>/dev/null | sort -hr
+          # time df -h
 
       - name: Log in to the Container registry
         uses: docker/login-action@v1
@@ -77,19 +79,19 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ github.repository }}
           flavor: |
             latest=auto
-            prefix=${{ matrix.path }}-${{ matrix.image-os }}-${{ matrix.unity-version }}-
+            prefix=${{ matrix.path }}-${{ matrix.image-os }}-${{ steps.version-select.outputs.version }}-
             suffix=
 
-      - name: Build and push Docker image
+      - name: Build the Docker image
         uses: docker/build-push-action@v2
         with:
           context: ./${{ matrix.path }}
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.ref == 'main' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             module=ios android android-sdk-ndk-tools android-open-jdk
             hubImage=unityci/hub:${{ matrix.image-os }}-${{ env.BASE_REPO_VERSION }}
             baseImage=unityci/base:${{ matrix.image-os }}-${{ env.BASE_REPO_VERSION }}
-            version=${{ matrix.unity-version }}
-            changeSet=${{ matrix.unity-version-changeSet }}
+            version=${{ steps.version-select.outputs.version }}
+            changeSet=${{ steps.version-select.outputs.changeset }}
