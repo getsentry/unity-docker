@@ -106,7 +106,7 @@ jobs:
           context: ./${{ matrix.path }}
           push: ${{ github.ref_name == 'main' }}
           # tags: ${{ steps.meta.outputs.tags }}
-          tags: ${{ steps.version-select.outputs.imageTag }}
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ steps.version-select.outputs.imageTag }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             module=ios android android-sdk-ndk-tools android-open-jdk
