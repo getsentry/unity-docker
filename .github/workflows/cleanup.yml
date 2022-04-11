@@ -1,0 +1,22 @@
+name: Find unused images
+
+on:
+  push:
+  schedule:
+    - cron: '0 6 * * *'
+
+jobs:
+  editor:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v2
+      - name: Find unused versions
+        shell: pwsh
+        run: |
+          # $usedVersions = scripts/used-versions.ps1
+          # Write-Host $usedVersions
+          $auth = @{Authorization = "Token ${env:GITHUB_TOKEN}"; Accept = 'application/vnd.github.machine-man-preview+json'}
+          Invoke-WebRequest -Headers $headers https://api.github.com/orgs/getsentry/packages/container/unity-docker
