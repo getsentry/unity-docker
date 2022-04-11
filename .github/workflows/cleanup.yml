@@ -1,0 +1,27 @@
+name: Find unused images
+
+on:
+  push:
+  schedule:
+    - cron: '0 6 * * *'
+
+jobs:
+  editor:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v2
+      - name: Find unused versions
+        shell: pwsh
+        run: |
+          $usedVersions = ./scripts/used-versions.ps1
+          Write-Host "Versions currently in use: $usedVersions"
+          foreach ($prefix in @('2019', '2020', '2021'))
+          {
+              $usedVersions += (./scripts/latest-version.ps1 $prefix).split("/")[0]
+          }
+          $usedVersions = $usedVersions | Sort-Object -Unique
+          Write-Host "Versions currently in use (including latest): $usedVersions"
+          ./scripts/obsolete-images.ps1 $usedVersions
