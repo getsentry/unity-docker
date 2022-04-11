@@ -35,7 +35,7 @@ jobs:
           $version,$changeset = $pair.split("/")
           echo "::set-output name=version::$version"
           echo "::set-output name=changeset::$changeset"
-          echo "::set-output name=imageTag::${{ matrix.path }}-${{ matrix.image-os }}-$version-main"
+          echo "::set-output name=imageTag::${{ matrix.path }}-${{ matrix.image-os }}-$version"
 
       - name: Check if the same version already exists
         id: exists
@@ -109,7 +109,7 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ steps.version-select.outputs.imageTag }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            module=ios android android-sdk-ndk-tools android-open-jdk
+            module=ios android android-sdk-ndk-tools android-open-jdk webgl
             hubImage=unityci/hub:${{ matrix.image-os }}-${{ env.BASE_REPO_VERSION }}
             baseImage=unityci/base:${{ matrix.image-os }}-${{ env.BASE_REPO_VERSION }}
             version=${{ steps.version-select.outputs.version }}
